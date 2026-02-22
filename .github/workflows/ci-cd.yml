@@ -1,0 +1,78 @@
+name: Flask CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build-test-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # Step 1: Checkout code
+
+    - name: Checkout Code
+
+      uses: actions/checkout@v3
+
+
+    # Step 2: Setup Python
+
+    - name: Setup Python
+
+      uses: actions/setup-python@v4
+
+      with:
+
+        python-version: '3.9'
+
+
+    # Step 3: Install dependencies
+
+    - name: Install Dependencies
+
+      run: |
+
+        pip install -r requirements.txt
+
+
+    # Step 4: Run Test
+
+    - name: Test Application
+
+      run: |
+
+        python app.py &
+
+        sleep 5
+
+        curl http://localhost:8080
+
+
+    # Step 5: Deploy to EC2
+
+    - name: Deploy to EC2
+
+      uses: appleboy/ssh-action@master
+
+      with:
+
+        host: ${{ secrets.EC2_HOST }}
+
+        username: ubuntu
+
+        key: ${{ secrets.EC2_SSH_KEY }}
+
+        script: |
+
+          cd simple-webapp-flask
+
+          git pull origin main
+
+          pkill -f app.py || true
+
+          nohup python3 app.py > output.log 2>&1 &
