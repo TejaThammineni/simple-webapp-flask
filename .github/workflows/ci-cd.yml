@@ -93,33 +93,3 @@ jobs:
 
           nohup python3 app.py > output.log 2>&1 &
 
-
-  deploy:
-
-    needs: test
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: Deploy to EC2
-
-      uses: appleboy/ssh-action@master
-
-      with:
-
-        host: ${{ secrets.EC2_HOST }}
-
-        username: ubuntu
-
-        key: ${{ secrets.EC2_SSH_KEY }}
-
-        script: |
-
-          cd simple-webapp-flask
-
-          git pull origin master
-
-          pkill -f app.py || true
-
-          nohup python3 app.py > output.log 2>&1 &
