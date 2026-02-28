@@ -7,53 +7,37 @@ on:
 
 jobs:
 
-  build-test-deploy:
+  build:
 
     runs-on: ubuntu-latest
 
     steps:
 
-    # Step 1: Checkout code
-
     - name: Checkout Code
-
       uses: actions/checkout@v3
 
 
-    # Step 2: Setup Python
-
     - name: Setup Python
-
       uses: actions/setup-python@v4
-
       with:
-
         python-version: '3.9'
 
 
-    # Step 3: Install dependencies
-
     - name: Install Dependencies
-
-      run: |
-
-        pip install -r requirements.txt
+      run: pip install -r requirements.txt
 
 
-    # Step 4: Run Test
-
-    - name: Test Application
-
-      run: |
-
-        python app.py &
-
-        sleep 5
-
-        curl http://localhost:8080
+    - name: Run Tests
+      run: pytest
 
 
-    # Step 5: Deploy to EC2
+  deploy:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
 
     - name: Deploy to EC2
 
@@ -71,7 +55,7 @@ jobs:
 
           cd simple-webapp-flask
 
-          git pull origin main
+          git pull origin master
 
           pkill -f app.py || true
 
