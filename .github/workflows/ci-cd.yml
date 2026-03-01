@@ -85,8 +85,8 @@ jobs:
 
         script: |
 
-          # ensure system packages
-          sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip git
+          # ensure system packages (procps gives us pkill)
+          sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip git procps
 
           # clone repo if missing
           if [ ! -d ~/simple-webapp-flask ]; then
@@ -102,9 +102,13 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          # stop any running instance
-          pkill -f app.py || true
+          # stop any running instance (only if pkill exists)
+          if command -v pkill >/dev/null 2>&1; then
+            pkill -f app.py || true
+          else
+            echo "warning: pkill not available, skipping process cleanup"
+          fi
 
-          # start app
-          nohup python3 app.py > output.log 2>&1 &
+          # start app using virtualenv python to ensure dependencies are available
+          nohup venv/bin/python app.py > output.log 2>&1 &
 
