@@ -102,12 +102,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          # stop any running instance (only if pkill exists)
-          if command -v pkill >/dev/null 2>&1; then
-            pkill -f app.py || true
-          else
-            echo "warning: pkill not available, skipping process cleanup"
-          fi
 
           # start app using virtualenv python to ensure dependencies are available
           nohup venv/bin/python app.py > output.log 2>&1 &
